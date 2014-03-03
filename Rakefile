@@ -73,6 +73,7 @@ end
 
 task :epub => :verify_data do |task, args|
 	verify(false,true)
+
 	mkdir_p 'output/epub', :verbose => false
 	puts "Création de la couverture ..."
 	Rake::Task[:pdf].invoke(false)
@@ -90,25 +91,25 @@ task :epub => :verify_data do |task, args|
 
 end
 
-task :teaser do
+task :teaser, [:format] do |task,args|
 
-	`pandoc -f markdown -t latex teaser.md -o teaser.tex`
-
-end
-
-task :quote do
-
-	`pandoc -f markdown -t latex quote.md -o quote.tex`
+	`pandoc -f markdown -t #{args[:format]} teaser.md -o teaser.#{args[:format]}`
 
 end
 
-task :image_couverture do
+task :quote, [:format] do |task,args|
 
-	`pandoc -f markdown -t latex image_couverture.md -o image_couverture.tex`
+	`pandoc -f markdown -t #{args[:format]} quote.md -o quote.#{args[:format]}`
 
 end
 
-task :pdf, [:verbosity] => [:verify_data,:image_couverture,:quote,:teaser] do |task, args|
+task :image_couverture, [:format] do |task,args|
+
+	`pandoc -f markdown -t #{args[:format]} image_couverture.md -o image_couverture.#{args[:format]}`
+
+end
+
+task :pdf, [:verbosity] => [:verify_data] do |task, args|
 
 	args.with_defaults(:verbosity => true)
 
@@ -119,6 +120,8 @@ task :pdf, [:verbosity] => [:verify_data,:image_couverture,:quote,:teaser] do |t
 		puts "Creation du document pdf"
 
 	end
+
+	Rake::Task[:image_couverture,:teaser,:quote].invoke("tex")
 
 	`pandoc -S -s --template=./podcastscience-template.latex --toc -V lang:french -V mainfont:Cambria -V fontsize:11pt -V geometry:a4paper -s --latex-engine xelatex titre.md document.md -o output/pdf/document.pdf`
 
@@ -133,7 +136,8 @@ task :html => :verify_data do
 	mkdir_p 'output/html'
 	mkdir_p 'output/html/images'
 	convertImages "images","output/html/images"
-	`pandoc -s teaser.md document.md -o output/html/document.html`
+
+	`pandoc -s -S -t html5 titre.md image_couverture.md quote.md teaser.md document.md -o output/html/document.html`
 
 end
 
@@ -171,17 +175,28 @@ task :clean_deep => :clean do
 				rm file	
 			end
 		end
-
 	end
-
 end
 
 task :generate do
-
-	touch "document.md"
+	
 	cp "images/placeholder.png","image_couverture.png"
 
 	titre = ENV["titre"] || "Nouvel épisode"
+
+	if File.exist?("document.md") then
+		if ask("Le fichier document.md va être écrasé. Souhaitez-vous l'écraser néanmoins", ['y','n']) == 'y' then
+			puts "Ecriture du fichier document.md"
+			open("document.md", 'w'){ |f|
+				f.puts "\# Dossier : #{titre}"
+			}
+		end
+	else
+		puts "Ecriture du fichier document.md"
+		open("document.md", 'w'){ |f|
+			f.puts "\# Dossier : #{titre}"
+		}
+	end
 
 	if File.exist?("image_couverture.md") then
 		if ask("Le fichier image_couverture.md va être écrasé. Souhaitez-vous l'écraser néanmoins", ['y','n']) == 'y' then
@@ -265,7 +280,7 @@ task :generate do
 
 			File.readlines("DOCS.md").each do |line|
 
-				if line_index != 0 then
+				if line_index > 4 then
 					open("README.md", 'a'){ |f|
 						f.puts line
 					}

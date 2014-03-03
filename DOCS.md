@@ -31,13 +31,13 @@ Avant toute génération de documents pour un épisode, il est nécessaire de s'
 
 Vous pouvez effectuer cette opération en utilisant la commande suivante : 
 
-    make verify
+    rake verify
 
 ### Génération des éléments d'un épisode
 
 Pour générer les fichiers de base, il est nécessaire d'exécuter la commande suivante : 
     
-    make generate
+    rake generate
 
 Cette commande génèrera pour vous les éléments nécessaires à la bonne génération des fichiers ci-dessus.
 
@@ -53,16 +53,17 @@ Trois formats sont actuellement disponibles comme sortie :
 
 Ces trois cibles sont donc disponibles pour la compilation :
 
-    make pdf # pour la génération de pdf
-    make html # pour la génération d'html
-    make epub # pour la génération d'epub
-    make all # pour tout générer
+    rake pdf # pour la génération de pdf
+    rake html # pour la génération d'html
+    rake epub # pour la génération d'epub
+    rake all # pour tout générer
 
 ### Nettoyage des fichiers d'output
 
 Pour nettoyer les fichiers d'output, des cibles correspondantes existent :
 
-    make clean_pdf # pour supprimer les fichiers correspondant à la sortie pdf
-    make clean_html # même chose pour la sortie html
-    make clean_epub # même chose pour la sortie epub
-    make clean # pour l'ensemble des sorties
+    rake clean_pdf # pour supprimer les fichiers correspondant à la sortie pdf
+    rake clean_html # même chose pour la sortie html
+    rake clean_epub # même chose pour la sortie epub
+    rake clean # pour l'ensemble des sorties
+    rake clean_deep # pour supprimer les fichiers générés

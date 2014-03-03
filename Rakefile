@@ -91,25 +91,25 @@ task :epub => :verify_data do |task, args|
 
 end
 
-task :teaser, [:format] do |task,args|
+task :teaser do |task,args|
 
-	`pandoc -f markdown -t #{args[:format]} teaser.md -o teaser.#{args[:format]}`
-
-end
-
-task :quote, [:format] do |task,args|
-
-	`pandoc -f markdown -t #{args[:format]} quote.md -o quote.#{args[:format]}`
+	`pandoc -f markdown -t latex teaser.md -o teaser.tex`
 
 end
 
-task :image_couverture, [:format] do |task,args|
+task :quote do |task,args|
 
-	`pandoc -f markdown -t #{args[:format]} image_couverture.md -o image_couverture.#{args[:format]}`
+	`pandoc -f markdown -t latex quote.md -o quote.tex`
 
 end
 
-task :pdf, [:verbosity] => [:verify_data] do |task, args|
+task :image_couverture do |task,args|
+
+	`pandoc -f markdown -t latex image_couverture.md -o image_couverture.tex`
+
+end
+
+task :pdf, [:verbosity] => [:verify_data, :image_couverture, :quote, :teaser] do |task, args|
 
 	args.with_defaults(:verbosity => true)
 
@@ -120,8 +120,6 @@ task :pdf, [:verbosity] => [:verify_data] do |task, args|
 		puts "Creation du document pdf"
 
 	end
-
-	Rake::Task[:image_couverture,:teaser,:quote].invoke("tex")
 
 	`pandoc -S -s --template=./podcastscience-template.latex --toc -V lang:french -V mainfont:Cambria -V fontsize:11pt -V geometry:a4paper -s --latex-engine xelatex titre.md document.md -o output/pdf/document.pdf`
 
